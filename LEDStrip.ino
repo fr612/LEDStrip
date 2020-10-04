@@ -6,9 +6,24 @@
 #define STRIPLENGTH 99.0f// Length of strip less 1
 #define STRIPLENGTHINT 99// Length of strip less 1
 
+enum FunModeEffects {
+  RAINBOW,
+  WHITE,
+  WHITE_WARM,
+  STROBE_TRIANGLE,
+  STROBE_SQUARE,
+  CONSTANT_COLOR,
+  OVERFLOWING,
+  INTERFERENCE_PATTERN,
+  SWIMMING_POOL,
+  BLOBS,
+  NUM_EFFECTS
+};
+
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(100, PIN, NEO_GRB + NEO_KHZ800);
 
-float brightness = 0.6f;
+BlobWorld blobWorld(STRIPLENGTHINT);
+float k = 0.0f;
 
 void setup()
 {
@@ -27,200 +42,183 @@ void setup()
 
 void loop()
 {
-  float k = 0.0f;
-  float delta1;
-  float delta2;
-  float delta3;
-  int j = 0;
+  if (digitalRead(3) == HIGH) updateConstantColorMode();
+  if (digitalRead(2) == HIGH) updateFunMode();
+}
 
-  BlobWorld blobWorld(STRIPLENGTHINT);
+void updateConstantColorMode()
+{
+  Serial.print(analogRead(3));
+  float brightness = 1 - analogRead(3) / 1023.0f;
+  float hue = analogRead(0) / 1024.0f;
 
-  float hue;
-
-  // constant colour mode
-  if (digitalRead(3) == HIGH)
+  for (int i = 0; i <= STRIPLENGTHINT; i++)
   {
-    Serial.print(analogRead(3));
-    brightness = 1 - analogRead(3) / 1023.0f;
-    hue = analogRead(0) / 1024.0f;
+    strip.setPixelColor(i, brightness * (127 * cos(hue * 6.3) + 127), brightness * (127 * cos(hue * 6.3 + 4.2) + 127), brightness * (127 * cos(hue * 6.3 + 8.4) + 127));
+  }
 
+  strip.show();
+}
+
+void updateFunMode()
+{
+  int knobValue = analogRead(0);
+  int selectedEffect = knobValue / (1024.0f / NUM_EFFECTS);
+
+  if (selectedEffect == RAINBOW)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
-      strip.setPixelColor(i, brightness * (127 * cos(hue * 6.3) + 127), brightness * (127 * cos(hue * 6.3 + 4.2) + 127), brightness * (127 * cos(hue * 6.3 + 8.4) + 127));
+      strip.setPixelColor(i, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + k) + 127), brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 2.1 + k) + 127), brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 4.2 + k) + 127));
     }
+    strip.show();
 
+    if (k <= 6.3)
+    {
+      k = k + 0.1;
+    }
+    else
+    {
+      k = 0;
+    }
+  }
+
+  if (selectedEffect == WHITE)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      strip.setPixelColor(i, brightness * 255, brightness * 255, brightness * 255);
+    }
     strip.show();
   }
 
-  // fun mode
-  if (digitalRead(2) == HIGH)
+  if (selectedEffect == WHITE_WARM)
   {
-    // rainbow mode
-    while (analogRead(0) < 90)
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + k) + 127), brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 2.1 + k) + 127), brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 4.2 + k) + 127));
-      }
-      strip.show();
+      strip.setPixelColor(i, brightness * 41, brightness * 255, brightness * 147);
+    }
+    strip.show();
+  }
 
-      if (k <= 6.3)
-      {
-        k = k + 0.1;
-      }
-      else
-      {
-        k = 0;
-      }
+  if (selectedEffect == STROBE_TRIANGLE)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      strip.setPixelColor(i, brightness * (255 * k), brightness * (255 * k), brightness * (255 * k));
+    }
+    strip.show();
+
+    if (k <= 1)
+    {
+      k = k + 0.05;
+    }
+    else
+    {
+      k = 0;
+    }
+  }
+
+  if (selectedEffect == STROBE_SQUARE)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      strip.setPixelColor(i, brightness * 255, brightness * 255, brightness * 255);
+    }
+    strip.show();
+    delay(10);
+
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      strip.setPixelColor(i, brightness * 0, brightness * 0, brightness * 0);
+    }
+    strip.show();
+    delay(10);
+  }
+
+  if (selectedEffect == CONSTANT_COLOR)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      strip.setPixelColor(i, brightness * 255, brightness * 200, brightness * 100);
+    }
+    strip.show();
+    delay(50);
+  }
+
+  if (selectedEffect == OVERFLOWING)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      strip.setPixelColor(i, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + k) + 127) * 3, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 2.1 + k) + 127) * 3, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 4.2 + k) + 127) * 3);
+    }
+    strip.show();
+
+    if (k <= 6.3)
+    {
+      k = k + 0.1;
+    }
+    else
+    {
+      k = 0;
+    }
+  }
+
+  if (selectedEffect == INTERFERENCE_PATTERN)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      //delta[1]=(cos(i*6.3f/49.0f*2.0f+k)/5.0f+0.66f+cos(i*6.3f/49.0f*10.0f+2*k)/12.5f+cos(i*6.3f/49.0f*18.2f+2*k)/17.5f);
+      float delta1 = (cos(i * 6.3f / STRIPLENGTH * 2.0f + k) / 5.0f + 0.66f);
+      float delta2 = (0.66f + cos(i * 6.3f / STRIPLENGTH * 10.0f + 2 * k) / 12.5f);
+      float delta3 = (0.66f + cos(i * 6.3f / STRIPLENGTH * 18.2f + 2 * k) / 17.5f);
+      strip.setPixelColor(i, delta1 * brightness * 41, brightness * 255 * delta2, brightness * 147 * delta3);
+    }
+    strip.show();
+
+    if (k <= 6.3f)
+    {
+      k = k + 0.05f + random(0, 100) / 2000.0f;
+    }
+    else
+    {
+      k = 0.0f;
+    }
+  }
+
+  if (selectedEffect == SWIMMING_POOL)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      float delta1 = (cos(i * 6.3f / STRIPLENGTH * 2.0f + k) / 5.0f + 0.8f);
+      strip.setPixelColor(i, brightness * delta1 * 41, brightness * delta1 * 255, brightness * delta1 * 147);
+    }
+    strip.show();
+
+    if (k <= 6.3f)
+    {
+      k = k + 0.15f;
+    }
+    else
+    {
+      k = 0.0f;
     }
 
-    // white mode
-    while ((analogRead(0) >= 90) && (analogRead(0) < 150))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * 255, brightness * 255, brightness * 255);
-      }
-      strip.show();
-    }
+    Serial.print(k);
+  }
 
-    // warm white mode
-    while ((analogRead(0) >= 150) && (analogRead(0) < 210))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * 41, brightness * 255, brightness * 147);
-      }
-      strip.show();
-    }
-
-    // triangle strobe mode
-    while ((analogRead(0) >= 210) && (analogRead(0) < 341))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * (255 * k), brightness * (255 * k), brightness * (255 * k));
-      }
-      strip.show();
-
-      if (k <= 1)
-      {
-        k = k + 0.05;
-      }
-      else
-      {
-        k = 0;
-      }
-    }
-
-    // normal strobe mode
-    while ((analogRead(0) >= 341) && (analogRead(0) < 457))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * 255, brightness * 255, brightness * 255);
-      }
-      strip.show();
-      delay(10);
-
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * 0, brightness * 0, brightness * 0);
-      }
-      strip.show();
-      delay(10);
-    }
-
-    // constant colour mode
-    while ((analogRead(0) >= 454) && (analogRead(0) < 568))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * 255, brightness * 200, brightness * 100);
-      }
-      strip.show();
-      delay(50);
-    }
-
-    // overflowing mode
-    while ((analogRead(0) >= 568) && (analogRead(0) < 682))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        strip.setPixelColor(i, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + k) + 127) * 3, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 2.1 + k) + 127) * 3, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 4.2 + k) + 127) * 3);
-      }
-      strip.show();
-
-      if (k <= 6.3)
-      {
-        k = k + 0.1;
-      }
-      else
-      {
-        k = 0;
-      }
-    }
-
-    // some sort of interference pattern thing
-    while ((analogRead(0) >= 682) && (analogRead(0) < 796))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        //delta[1]=(cos(i*6.3f/49.0f*2.0f+k)/5.0f+0.66f+cos(i*6.3f/49.0f*10.0f+2*k)/12.5f+cos(i*6.3f/49.0f*18.2f+2*k)/17.5f);
-        delta1 = (cos(i * 6.3f / STRIPLENGTH * 2.0f + k) / 5.0f + 0.66f);
-        delta2 = (0.66f + cos(i * 6.3f / STRIPLENGTH * 10.0f + 2 * k) / 12.5f);
-        delta3 = (0.66f + cos(i * 6.3f / STRIPLENGTH * 18.2f + 2 * k) / 17.5f);
-        strip.setPixelColor(i, delta1 * brightness * 41, brightness * 255 * delta2, brightness * 147 * delta3);
-      }
-      strip.show();
-
-      if (k <= 6.3f)
-      {
-        k = k + 0.05f + random(0, 100) / 2000.0f;
-      }
-      else
-      {
-        k = 0.0f;
-      }
-    }
-
-    // swimming pool mode
-    while ((analogRead(0) >= 796) && (analogRead(0) < 909))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      for (int i = 0; i <= STRIPLENGTHINT; i++)
-      {
-        delta1 = (cos(i * 6.3f / STRIPLENGTH * 2.0f + k) / 5.0f + 0.8f);
-        strip.setPixelColor(i, brightness * delta1 * 41, brightness * delta1 * 255, brightness * delta1 * 147);
-      }
-      strip.show();
-
-      if (k <= 6.3f)
-      {
-        k = k + 0.15f;
-      }
-      else
-      {
-        k = 0.0f;
-      }
-
-      Serial.print(k);
-    }
-
-    // blob physics mode
-    while ((analogRead(0) >= 909))
-    {
-      brightness = 1 - analogRead(3) / 1023.0f;
-      blobWorld.update(strip, brightness);
-      Serial.print(brightness);
-    }
+  if (selectedEffect == BLOBS)
+  {
+    float brightness = 1 - analogRead(3) / 1023.0f;
+    blobWorld.update(strip, brightness);
   }
 }

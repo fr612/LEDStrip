@@ -3,27 +3,46 @@
 #include "BlobWorld.h"
 
 #define PIN 8
+
+// TODO: Why is this not 100? Strip is initialized with 100
 #define STRIPLENGTH 99.0f// Length of strip less 1
 #define STRIPLENGTHINT 99// Length of strip less 1
 
+#define BIG_KNOB_PIN 0
+#define SMALL_KNOB_PIN 3
+
 enum FunModeEffects {
-  RAINBOW,
-  WHITE,
-  WHITE_WARM,
-  STROBE_TRIANGLE,
   STROBE_SQUARE,
-  CONSTANT_COLOR,
-  OVERFLOWING,
   INTERFERENCE_PATTERN,
   SWIMMING_POOL,
+  RAINBOW,
+  OVERFLOWING,
   BLOBS,
-  NUM_EFFECTS
+
+  // Place new effects above this point
+  // Any below this will be disabled
+  NUM_EFFECTS,
+
+  STROBE_TRIANGLE,
+  WHITE,
+  WHITE_WARM,
+  CONSTANT_COLOR
 };
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(100, PIN, NEO_GRB + NEO_KHZ800);
 
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;
+
+float readBigKnob() {
+  // 1 - result because box is upside down 
+  return 1 - (analogRead(BIG_KNOB_PIN) / 1024.0f);
+}
+
+float readSmallKnob() {
+  // 1 - result because box is upside down 
+  return 1 - (analogRead(SMALL_KNOB_PIN) / 1024.0f);
+}
 
 void setup()
 {
@@ -48,9 +67,8 @@ void loop()
 
 void updateConstantColorMode()
 {
-  Serial.print(analogRead(3));
-  float brightness = 1 - analogRead(3) / 1023.0f;
-  float hue = analogRead(0) / 1024.0f;
+  float brightness = readSmallKnob();
+  float hue = readBigKnob();
 
   for (int i = 0; i <= STRIPLENGTHINT; i++)
   {
@@ -62,12 +80,11 @@ void updateConstantColorMode()
 
 void updateFunMode()
 {
-  int knobValue = analogRead(0);
-  int selectedEffect = knobValue / (1024.0f / NUM_EFFECTS);
+  int selectedEffect = readBigKnob() * NUM_EFFECTS;
 
   if (selectedEffect == RAINBOW)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = readSmallKnob();
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + k) + 127), brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 2.1 + k) + 127), brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 4.2 + k) + 127));
@@ -86,7 +103,7 @@ void updateFunMode()
 
   if (selectedEffect == WHITE)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = readSmallKnob();
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * 255, brightness * 255, brightness * 255);
@@ -96,7 +113,7 @@ void updateFunMode()
 
   if (selectedEffect == WHITE_WARM)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = 1 - readSmallKnob();
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * 41, brightness * 255, brightness * 147);
@@ -106,7 +123,7 @@ void updateFunMode()
 
   if (selectedEffect == STROBE_TRIANGLE)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = 0.7f;
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * (255 * k), brightness * (255 * k), brightness * (255 * k));
@@ -115,7 +132,7 @@ void updateFunMode()
 
     if (k <= 1)
     {
-      k = k + 0.05;
+      k = k + 0.1 * readSmallKnob();
     }
     else
     {
@@ -125,25 +142,27 @@ void updateFunMode()
 
   if (selectedEffect == STROBE_SQUARE)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = 0.6f;
+    int delayLength = min(10/readSmallKnob(), 1000);
+
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * 255, brightness * 255, brightness * 255);
     }
     strip.show();
-    delay(10);
+    delay(delayLength);
 
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * 0, brightness * 0, brightness * 0);
     }
     strip.show();
-    delay(10);
+    delay(delayLength);
   }
 
   if (selectedEffect == CONSTANT_COLOR)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = readSmallKnob();
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * 255, brightness * 200, brightness * 100);
@@ -154,7 +173,7 @@ void updateFunMode()
 
   if (selectedEffect == OVERFLOWING)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = readSmallKnob();
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       strip.setPixelColor(i, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + k) + 127) * 3, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 2.1 + k) + 127) * 3, brightness * (127 * cos(i * 6.3 / STRIPLENGTHINT + 4.2 + k) + 127) * 3);
@@ -173,7 +192,7 @@ void updateFunMode()
 
   if (selectedEffect == INTERFERENCE_PATTERN)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = readSmallKnob();
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       //delta[1]=(cos(i*6.3f/49.0f*2.0f+k)/5.0f+0.66f+cos(i*6.3f/49.0f*10.0f+2*k)/12.5f+cos(i*6.3f/49.0f*18.2f+2*k)/17.5f);
@@ -196,7 +215,7 @@ void updateFunMode()
 
   if (selectedEffect == SWIMMING_POOL)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = readSmallKnob();
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       float delta1 = (cos(i * 6.3f / STRIPLENGTH * 2.0f + k) / 5.0f + 0.8f);
@@ -218,7 +237,7 @@ void updateFunMode()
 
   if (selectedEffect == BLOBS)
   {
-    float brightness = 1 - analogRead(3) / 1023.0f;
+    float brightness = readSmallKnob();
     blobWorld.update(strip, brightness);
   }
 }

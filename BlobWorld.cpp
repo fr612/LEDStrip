@@ -2,7 +2,7 @@
 #include "BlobWorld.h"
 
 BlobWorld::BlobWorld(int stripLength) :
-blob{
+  blob{
     {
       3.0f, 1.0f, {
         0, 255, 147

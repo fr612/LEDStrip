@@ -3,8 +3,8 @@
 #include "BlobWorld.h"
 
 #define PIN 8
-#define STRIPLENGTH 99.0f// Length of strip less 1
-#define STRIPLENGTHINT 99// Length of strip less 1
+#define STRIPLENGTH 97.0f// Length of strip less 1
+#define STRIPLENGTHINT 97// Length of strip less 1
 
 enum FunModeEffects {
   RAINBOW,

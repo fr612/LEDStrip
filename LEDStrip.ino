@@ -36,12 +36,12 @@ float k = 0.0f;
 
 float readBigKnob() {
   // 1 - result because box is upside down 
-  return 1 - (analogRead(BIG_KNOB_PIN) / 1024.0f);
+  return 1 - ((analogRead(BIG_KNOB_PIN) + 1) / 1024.0f);
 }
 
 float readSmallKnob() {
   // 1 - result because box is upside down 
-  return 1 - (analogRead(SMALL_KNOB_PIN) / 1024.0f);
+  return 1 - ((analogRead(SMALL_KNOB_PIN) + 1) / 1024.0f);
 }
 
 void setup()

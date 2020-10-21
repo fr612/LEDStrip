@@ -1,3 +1,4 @@
+#include "Arduino.h"
 #include <Adafruit_NeoPixel.h>
 
 #include "BlobWorld.h"
@@ -46,6 +47,18 @@ float readBigKnob() {
 float readSmallKnob() {
   // 1 - result because box is upside down 
   return 1 - ((analogRead(SMALL_KNOB_PIN) + 1) / 1024.0f);
+}
+
+void setPixelRGB(int index, float r, float g, float b) 
+{
+  strip.setPixelColor(index, r, g, b);
+}
+
+void setPixelHSV(int index, float h, float s, float v) 
+{
+  float rgb[3];
+  hsv2rgb(h, s, v, rgb);
+  setPixelRGB(index, rgb[0], rgb[1], rgb[2]);
 }
 
 void setup()

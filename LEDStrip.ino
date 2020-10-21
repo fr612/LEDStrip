@@ -16,6 +16,7 @@ enum FunModeEffects {
   SWIMMING_POOL,
   RAINBOW,
   OVERFLOWING,
+  TRIANGLES_FADE,
   BLOBS,
 
   // Place new effects above this point
@@ -32,6 +33,10 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
 
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;
+float kTwo = 0.4f;
+
+// TODO: Remove by coming up with generalised pattern interface
+int pixelIndex = 0;
 
 float readBigKnob() {
   // 1 - result because box is upside down 
@@ -232,6 +237,34 @@ void updateFunMode()
     }
 
     Serial.print(k);
+  }
+  
+  if (selectedEffect == TRIANGLES_FADE)
+  {
+    int firstTriangleLength = 64;
+  
+    float brightness = readSmallKnob();
+    float hue = abs(k - 1);
+    float hueTwo = abs(kTwo - 1);
+
+    k += 0.01f;
+    if (k > 2) k = 0.0f;
+    
+    kTwo += 0.004f;
+    if (kTwo > 2) kTwo = 0.0f;
+
+    for (int i = 0; i <= STRIPLENGTHINT; i++)
+    {
+      if(i < firstTriangleLength) {
+        strip.setPixelColor(i, brightness * (127 * cos(hue * 6.3) + 127), brightness * (127 * cos(hue * 6.3 + 4.2) + 127), brightness * (127 * cos(hue * 6.3 + 8.4) + 127));
+      }
+      else 
+      {
+        strip.setPixelColor(i, brightness * (127 * cos(hueTwo * 6.3) + 127), brightness * (127 * cos(hueTwo * 6.3 + 4.2) + 127), brightness * (127 * cos(hueTwo * 6.3 + 8.4) + 127));
+      }
+    }
+
+    strip.show();
   }
 
   if (selectedEffect == BLOBS)

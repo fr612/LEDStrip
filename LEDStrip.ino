@@ -4,9 +4,8 @@
 
 #define PIN 8
 
-// TODO: Why is this not 100? Strip is initialized with 100
-#define STRIPLENGTH 99.0f// Length of strip less 1
-#define STRIPLENGTHINT 99// Length of strip less 1
+#define STRIPLENGTH 97.0f// Length of strip less 1
+#define STRIPLENGTHINT 97// Length of strip less 1
 
 #define BIG_KNOB_PIN 0
 #define SMALL_KNOB_PIN 3
@@ -29,7 +28,7 @@ enum FunModeEffects {
   CONSTANT_COLOR
 };
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(100, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
 
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;

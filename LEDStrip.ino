@@ -51,13 +51,13 @@ float readSmallKnob() {
 
 void setPixelRGB(int index, float r, float g, float b) 
 {
-  strip.setPixelColor(index, r, g, b);
+  strip.setPixelColor(index, r * 255, g * 255, b * 255);
 }
 
 void setPixelHSV(int index, float h, float s, float v) 
 {
   float rgb[3];
-  hsv2rgb(h, s, v, rgb);
+  cubehelix_hsv2rgb(h, s, v, rgb);
   setPixelRGB(index, rgb[0], rgb[1], rgb[2]);
 }
 
@@ -260,20 +260,20 @@ void updateFunMode()
     float hue = abs(k - 1);
     float hueTwo = abs(kTwo - 1);
 
-    k += 0.01f;
-    if (k > 2) k = 0.0f;
+    k += 0.002f;
+    if (k > 1) k = 0.0f;
     
-    kTwo += 0.004f;
-    if (kTwo > 2) kTwo = 0.0f;
+    kTwo -= 0.0011f;
+    if (kTwo < 0) kTwo = 1.0f;
 
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
       if(i < firstTriangleLength) {
-        strip.setPixelColor(i, brightness * (127 * cos(hue * 6.3) + 127), brightness * (127 * cos(hue * 6.3 + 4.2) + 127), brightness * (127 * cos(hue * 6.3 + 8.4) + 127));
+        setPixelHSV(i, hue, 0.4f, brightness);
       }
       else 
       {
-        strip.setPixelColor(i, brightness * (127 * cos(hueTwo * 6.3) + 127), brightness * (127 * cos(hueTwo * 6.3 + 4.2) + 127), brightness * (127 * cos(hueTwo * 6.3 + 8.4) + 127));
+        setPixelHSV(i, hueTwo, 0.4f, brightness);
       }
     }
 

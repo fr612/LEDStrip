@@ -8,6 +8,8 @@
 #define STRIPLENGTH 97.0f// Length of strip less 1
 #define STRIPLENGTHINT 97// Length of strip less 1
 
+#define FIRST_TRIANGLE_LENGTH 64
+
 #define BIG_KNOB_PIN 0
 #define SMALL_KNOB_PIN 3
 
@@ -17,7 +19,7 @@ enum FunModeEffects {
   SWIMMING_POOL,
   RAINBOW,
   OVERFLOWING,
-  TRIANGLES_FADE,
+  PIXEL_FADE,
   BLOBS,
 
   // Place new effects above this point
@@ -34,10 +36,8 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
 
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;
-float kTwo = 0.4f;
 
-// TODO: Remove by coming up with generalised pattern interface
-int pixelIndex = 0;
+float hues[STRIPLENGTHINT];
 
 float readBigKnob() {
   // 1 - result because box is upside down 
@@ -72,6 +72,9 @@ void setup()
 
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
+
+  k = random(1000) / 1000.0f;
+  memset(hues, 0.0f, sizeof(hues));
 
   Serial.begin(9600);
 }
@@ -250,34 +253,37 @@ void updateFunMode()
     }
 
     Serial.print(k);
+
   }
   
-  if (selectedEffect == TRIANGLES_FADE)
+  if (selectedEffect == PIXEL_FADE)
   {
-    int firstTriangleLength = 64;
-  
-    float brightness = readSmallKnob();
-    float hue = abs(k - 1);
-    float hueTwo = abs(kTwo - 1);
+    float brightness = readSmallKnob() * 0.4f;
 
-    k += 0.002f;
-    if (k > 1) k = 0.0f;
-    
-    kTwo -= 0.0011f;
-    if (kTwo < 0) kTwo = 1.0f;
+    // Seed random based on selected hue so that pixels have different
+    // random speeds each time
+    randomSeed(k *1200);
+
+    float maxDifference = 0.0f;
 
     for (int i = 0; i <= STRIPLENGTHINT; i++)
     {
-      if(i < firstTriangleLength) {
-        setPixelHSV(i, hue, 0.4f, brightness);
-      }
-      else 
-      {
-        setPixelHSV(i, hueTwo, 0.4f, brightness);
-      }
+      // Move each pixel towards the selected hue at it's own random speed
+      float pixelSpeed = random(500) / 1000.0f + 0.5f;
+      hues[i] += (k - hues[i]) * pixelSpeed * 0.002f;
+      setPixelHSV(i, hues[i], 0.4f, brightness);
+
+      maxDifference = max(maxDifference, abs(hues[i] - k));
     }
 
     strip.show();
+    
+    // When all pixels are close to the target hue 
+    // select a new hue at random
+    if(maxDifference < 0.08f)  
+    {
+      k = random(1000) / 1000.0f;
+    }
   }
 
   if (selectedEffect == BLOBS)

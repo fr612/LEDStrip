@@ -73,7 +73,6 @@ void setup()
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 
-  k = random(1000) / 1000.0f;
   memset(hues, 0.0f, sizeof(hues));
 
   Serial.begin(9600);
@@ -253,7 +252,6 @@ void updateFunMode()
     }
 
     Serial.print(k);
-
   }
   
   if (selectedEffect == PIXEL_FADE)

@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "BlobWorld.h"
+#include "SpiderEyes.hpp"
 
 #define PIN 8
 
@@ -17,6 +18,7 @@ enum FunModeEffects {
   RAINBOW,
   OVERFLOWING,
   BLOBS,
+  SPIDER_EYES,
 
   // Place new effects above this point
   // Any below this will be disabled
@@ -29,6 +31,8 @@ enum FunModeEffects {
 };
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
+
+SpiderEyes * spiderEyes;
 
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;
@@ -51,6 +55,11 @@ void setup()
   pinMode(A3, INPUT);
   pinMode(5, OUTPUT);
   digitalWrite(5, HIGH);
+
+  spiderEyes = new SpiderEyes(strip);
+  spiderEyes->setGlobalBrightness(150, strip);
+  spiderEyes->setPattern(PATTERN_CREEPY_EYES);
+  spiderEyes->setPatternTime(800);
 
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
@@ -238,5 +247,12 @@ void updateFunMode()
   {
     float brightness = readSmallKnob();
     blobWorld.update(strip, brightness);
+  }
+
+  if (selectedEffect == SPIDER_EYES)
+  {
+    float brightness = readSmallKnob();
+    spiderEyes->setGlobalBrightness(brightness, strip);
+    spiderEyes->poll(strip);
   }
 }

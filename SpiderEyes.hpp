@@ -3,23 +3,21 @@
 
 #include <Adafruit_NeoPixel.h>
 
+#include <Vector.h>
+
 // Wraps up the NeoPixel object and it's current RGB values into one
 // object for convenience
 class Eye
 {
 public:
-    Adafruit_NeoPixel * strip;
     uint8_t red = 0;
     uint8_t green = 0;
     uint8_t blue = 0;
     uint8_t highlightLed = 0;
     uint8_t trailLed = 0;
-    uint8_t length = 2;
     uint8_t highlightLedBrightness = 0;
-
-private:
-
-
+    uint8_t firstPixelOffset = 0;
+    uint8_t length = 2;
 };
 
 // Which pattern the spider is in
@@ -33,13 +31,13 @@ enum PatternMode
 class SpiderEyes
 {
 public:
-    SpiderEyes();
+    SpiderEyes(Adafruit_NeoPixel & strip);
 
     void setPattern(PatternMode newPatternMode);
-    void setGlobalBrightness(uint8_t brightness);
+    void setGlobalBrightness(uint8_t brightness, Adafruit_NeoPixel & strip);
     void setPatternTime(int timeMs);
 
-    void Poll();
+    void poll(Adafruit_NeoPixel & strip);
 
     // Global brightness setting
     uint8_t globalBrightness = 150;
@@ -51,23 +49,13 @@ private:
 
     void setEyeRGB(Eye *eye, uint8_t red, uint8_t green, uint8_t blue);
 
-    void creepyEyesPoll();
-
-    void attackEyesInit();
-    void attackEyesPoll();
+    void creepyEyesPoll(Adafruit_NeoPixel & strip);
 
     void patternWrapCheckPoll();
 
-    void Strobe(bool on);
+    Vector<Eye> eyes;
 
-    Eye frontEye1;
-    Eye frontEye2;
-    Eye frontEye3;
-    Eye frontEye4;
-    Eye sideEyeLeft;
-    Eye sideEyeRight;
-    Eye mainEyeLeft;
-    Eye mainEyeRight;
+    Adafruit_NeoPixel * strip;
 
     // Watch that the fade increment isn't too short
     // 10ms is definitely too short
@@ -77,8 +65,6 @@ private:
     // Used to track how long it has been since the last action
     unsigned long lastTimeMs = 0;
     unsigned long lastFadeTimeMs = 0;
-    unsigned long attackEyesLastTimeMs = 0;
-    bool attackEyesLastStrobe = false;
 
     // Amount to fade between colours
     int8_t redFadeAmount = 0;
@@ -87,12 +73,6 @@ private:
     uint8_t fadeCoefficient = 0;
 
     // Colours for Creepy Eyes
-    uint8_t smallLedCreepyRed = 220;
-    int8_t smallLedCreepyRedIncrement = 1;
-    uint8_t smallLedCreepyGreen = 20;
-    int8_t smallLedCreepyGreenIncrement = -2;
-    uint8_t smallLedCreepyBlue = 60;
-    int8_t smallLedCreepyBlueIncrement = 3;
     uint8_t mainLedCreepyRed = 20;
     int8_t mainLedCreepyRedIncrement = -1;
     uint8_t mainLedCreepyGreen = 220;

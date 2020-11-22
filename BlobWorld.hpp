@@ -1,5 +1,5 @@
-#ifndef BlobWorld_h
-#define BlobWorld_h
+#ifndef BLOBWORLD_HPP
+#define BLOBWORLD_HPP
 
 #include <Adafruit_NeoPixel.h>
 

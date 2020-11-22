@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "BlobWorld.h"
+#include "BlobWorld.hpp"
 
 BlobWorld::BlobWorld(int stripLength) :
   blob{

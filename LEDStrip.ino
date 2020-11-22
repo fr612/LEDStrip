@@ -1,7 +1,8 @@
 #include "Arduino.h"
 #include <Adafruit_NeoPixel.h>
 
-#include "BlobWorld.h"
+#include "Strip.hpp"
+#include "BlobWorld.hpp"
 
 #define PIN 8
 
@@ -34,6 +35,8 @@ enum FunModeEffects {
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
 
+Strip fullStrip = Strip(strip);
+
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;
 
@@ -54,12 +57,14 @@ void setPixelRGB(int index, float r, float g, float b)
   strip.setPixelColor(index, r * 255, g * 255, b * 255);
 }
 
+/*
 void setPixelHSV(int index, float h, float s, float v) 
 {
   float rgb[3];
   cubehelix_hsv2rgb(h, s, v, rgb);
   setPixelRGB(index, rgb[0], rgb[1], rgb[2]);
 }
+*/
 
 void setup()
 {
@@ -269,7 +274,7 @@ void updateFunMode()
       // Move each pixel towards the selected hue at it's own random speed
       float pixelSpeed = random(500) / 1000.0f + 0.5f;
       hues[i] += (k - hues[i]) * pixelSpeed * 0.002f;
-      setPixelHSV(i, hues[i], 0.4f, brightness);
+      fullStrip.setPixelHSVf(i, hues[i], 0.4f, brightness);
 
       maxDifference = max(maxDifference, abs(hues[i] - k));
     }
@@ -282,6 +287,7 @@ void updateFunMode()
     {
       k = random(1000) / 1000.0f;
     }
+
   }
 
   if (selectedEffect == BLOBS)

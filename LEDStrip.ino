@@ -3,6 +3,7 @@
 
 #include "Strip.hpp"
 #include "BlobWorld.hpp"
+#include "effects/PixelFade.cpp"
 
 #define PIN 8
 
@@ -20,8 +21,8 @@ enum FunModeEffects {
   SWIMMING_POOL,
   RAINBOW,
   OVERFLOWING,
-  PIXEL_FADE,
   BLOBS,
+  PIXEL_FADE,
 
   // Place new effects above this point
   // Any below this will be disabled
@@ -35,7 +36,8 @@ enum FunModeEffects {
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
 
-Strip fullStrip = Strip(strip);
+Strip fullStrip = Strip(strip, 0, 98);
+PixelFade pixelFade = PixelFade(fullStrip);
 
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;
@@ -259,40 +261,15 @@ void updateFunMode()
     Serial.print(k);
   }
   
-  if (selectedEffect == PIXEL_FADE)
-  {
-    float brightness = readSmallKnob() * 0.4f;
-
-    // Seed random based on selected hue so that pixels have different
-    // random speeds each time
-    randomSeed(k *1200);
-
-    float maxDifference = 0.0f;
-
-    for (int i = 0; i <= STRIPLENGTHINT; i++)
-    {
-      // Move each pixel towards the selected hue at it's own random speed
-      float pixelSpeed = random(500) / 1000.0f + 0.5f;
-      hues[i] += (k - hues[i]) * pixelSpeed * 0.002f;
-      fullStrip.setPixelHSVf(i, hues[i], 0.4f, brightness);
-
-      maxDifference = max(maxDifference, abs(hues[i] - k));
-    }
-
-    strip.show();
-    
-    // When all pixels are close to the target hue 
-    // select a new hue at random
-    if(maxDifference < 0.08f)  
-    {
-      k = random(1000) / 1000.0f;
-    }
-
-  }
-
   if (selectedEffect == BLOBS)
   {
     float brightness = readSmallKnob();
     blobWorld.update(strip, brightness);
+  }
+
+  if (selectedEffect == PIXEL_FADE)
+  {
+    pixelFade.updateAndRender(readSmallKnob());
+    strip.show();
   }
 }

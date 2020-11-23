@@ -1,36 +1,29 @@
 #include "Strip.hpp"
 
-Strip::Strip(Adafruit_NeoPixel& strip) : 
-  strip(strip),
-  startOffset(0),
-  length(strip.getPixels())
-{
-}
-
-Strip::Strip(Adafruit_NeoPixel& strip, int startOffset, int length) : 
+Strip::Strip(Adafruit_NeoPixel& strip, uint16_t startOffset, uint16_t length) : 
   strip(strip),
   startOffset(startOffset),
   length(length)
 {
 }
 
-int Strip::getLength()
+uint16_t Strip::getLength()
 {
     return length;
 }
 
-void Strip::setPixelRGB(int index, uint8_t r, uint8_t g, uint8_t b)
+void Strip::setPixelRGB(uint16_t index, uint8_t r, uint8_t g, uint8_t b)
 {
-  int trueIndex = (index % length) + startOffset;
+  uint16_t trueIndex = (index % length) + startOffset;
   strip.setPixelColor(trueIndex, r, g, b);
 }
   
-void Strip::setPixelRGBf(int index, float r, float g, float b)
+void Strip::setPixelRGBf(uint16_t index, float r, float g, float b)
 {
     setPixelRGB(index, r*256, g*256, b*256);
 }
 
-void Strip::setPixelHSVf(int index, float h, float s, float v)
+void Strip::setPixelHSVf(uint16_t index, float h, float s, float v)
 {
   float rgb[3];
   cubehelixHSV2RGB(h, s, v, rgb);

@@ -1,4 +1,3 @@
-
 #ifndef STRIP_HPP
 #define STRIP_HPP
 
@@ -8,20 +7,19 @@ class Strip
 {
 
 public:
-  Strip(Adafruit_NeoPixel& strip);
-  Strip(Adafruit_NeoPixel& strip, int startOffset, int length);
+  Strip(Adafruit_NeoPixel& strip, uint16_t startOffset, uint16_t length);
 
-  int getLength();
+  uint16_t getLength();
   
-  void setPixelRGB(int index, uint8_t r, uint8_t g, uint8_t b);
+  void setPixelRGB(uint16_t index, uint8_t r, uint8_t g, uint8_t b);
   
-  void setPixelRGBf(int index, float r, float g, float b);
-  void setPixelHSVf(int index, float h, float s, float v);
+  void setPixelRGBf(uint16_t index, float r, float g, float b);
+  void setPixelHSVf(uint16_t index, float h, float s, float v);
 
 private:
   Adafruit_NeoPixel& strip;
-  int startOffset;
-  int length;
+  uint16_t startOffset;
+  uint16_t length;
 
   float* cubehelixHSV2RGB(float h, float s, float l, float* rgb);
 };

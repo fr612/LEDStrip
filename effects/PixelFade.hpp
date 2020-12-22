@@ -17,7 +17,7 @@ private:
 
   float getRandomFloat()
   {
-    return random(999)/1000.0f;
+    return random(10000)/10000.0f;
   };
 
   void explodeVelocities() 
@@ -25,14 +25,14 @@ private:
     for (int i = 0; i < N; ++i) 
     {
       float randomWithDirection = (getRandomFloat() * 2.0f) - 1.0f;
-      velocities[i] = 0.085f * randomWithDirection;
+      velocities[i] = 0.3f * randomWithDirection;
     }
   }
 
   void reset()
   {
     explodeVelocities();
-    targetHue = getRandomFloat();
+    targetHue = getRandomFloat() * 4.0f;
   }
 
 public:
@@ -48,38 +48,33 @@ public:
   {
     float brightness = smallKnobValue * 0.4f;
 
-    // Seed random based on selected hue so that pixels have different
-    // random speeds each time
-    //randomSeed(targetHue *1200);
-
     float maxDifference = 0.0f;
 
     for (int i = 0; i < N; i++)
     {
       // Update velocities
       float distance = targetHue - hues[i];
-      if (distance > 0.5f) distance = -1.0f - distance;
-      if (distance < -0.5f)  distance = 1.0f + distance; 
 
-      float attractionForce = distance * 0.0125f;
+      float attractionForce = distance * 0.002f;
       velocities[i] += attractionForce;
 
-      float damping = -velocities[i] * 0.011f;
+      float damping = -velocities[i] * 0.0075f;
       velocities[i] += damping;
       
       // Update hue with velocity
       hues[i] += velocities[i];
-      while (hues[i] > 1.0f) hues[i] -= 1.0f;
-      while (hues[i] < 0.0f) hues[i] += 1.0f;
 
-      strip.setPixelHSVf(i, hues[i], 0.4f, brightness);
+      // Wrap hue between 0.0 and 1.0 for rendering
+      float renderHue = hues[i] - (int)hues[i];
+      if (hues[i] < 0) renderHue = 1 + renderHue;
+      strip.setPixelHSVf(i, renderHue, 0.4f, brightness);
 
       maxDifference = max(maxDifference, abs(distance));
     }
 
     // When all pixels are close to the target hue 
     // select a new hue at random
-    if(maxDifference < 0.01f)  
+    if(maxDifference < 0.0005f)  
     {
       reset();
     }

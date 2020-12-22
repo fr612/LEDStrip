@@ -1,20 +1,16 @@
 #ifndef EFFECT_HPP
 #define EFFECT_HPP
 
-#include "../Strip.hpp"
+class Strip;
 
 class Effect
 {
 public:
-  Effect(Strip& strip) : 
-    strip(strip) 
-  {
-  }
 
-  virtual void updateAndRender(float smallKnobValue) = 0;
+  Effect(){};
 
-protected:
-  Strip& strip;
+  virtual void updateAndRender(Strip& strip, float smallKnobValue) = 0;
+
 };
 
 #endif

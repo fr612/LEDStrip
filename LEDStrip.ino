@@ -3,7 +3,7 @@
 
 #include "Strip.hpp"
 #include "BlobWorld.hpp"
-#include "effects/PixelFade.cpp"
+#include "effects/PixelFade.hpp"
 
 #define PIN 8
 
@@ -37,12 +37,10 @@ enum FunModeEffects {
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
 
 Strip fullStrip = Strip(strip, 0, 98);
-PixelFade pixelFade = PixelFade(fullStrip);
+PixelFade<98> pixelFade = PixelFade<98>();
 
 BlobWorld blobWorld(STRIPLENGTHINT);
 float k = 0.0f;
-
-float hues[STRIPLENGTHINT];
 
 float readBigKnob() {
   // 1 - result because box is upside down 
@@ -80,9 +78,7 @@ void setup()
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 
-  memset(hues, 0.0f, sizeof(hues));
-
-  Serial.begin(9600);
+  //Serial.begin(9600);
 }
 
 void loop()
@@ -269,7 +265,7 @@ void updateFunMode()
 
   if (selectedEffect == PIXEL_FADE)
   {
-    pixelFade.updateAndRender(readSmallKnob());
+    pixelFade.updateAndRender(fullStrip, readSmallKnob());
     strip.show();
   }
 }

@@ -26,7 +26,7 @@ private:
     for (int i = 0; i < N; ++i) 
     {
       float randomWithDirection = (getRandomFloat() * 2.0f) - 1.0f;
-      velocities[i] = 0.3f * randomWithDirection;
+      velocities[i] = 0.15f * randomWithDirection;
     }
   }
 
@@ -76,7 +76,7 @@ public:
 
     // When all pixels are close to the target hue 
     // select a new hue at random
-    if(maxDifference < 0.0005f)  
+    if(maxDifference < 0.005f)  
     {
       reset();
     }

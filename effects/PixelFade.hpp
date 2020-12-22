@@ -13,6 +13,7 @@ private:
   float hues[N];
   float velocities[N];
 
+  float dragScalar;
   float targetHue;
 
   float getRandomFloat()
@@ -36,7 +37,8 @@ private:
   }
 
 public:
-  PixelFade() 
+  PixelFade( float dragScalar = 1.0f) :
+    dragScalar(dragScalar)
   {
     float startHue = getRandomFloat();
     memset(&hues, startHue, sizeof(float) * N);
@@ -58,7 +60,7 @@ public:
       float attractionForce = distance * 0.002f;
       velocities[i] += attractionForce;
 
-      float damping = -velocities[i] * 0.0075f;
+      float damping = -velocities[i] * 0.0075f * dragScalar;
       velocities[i] += damping;
       
       // Update hue with velocity

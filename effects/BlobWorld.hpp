@@ -1,9 +1,9 @@
 #ifndef BLOBWORLD_HPP
 #define BLOBWORLD_HPP
 
-#include <Adafruit_NeoPixel.h>
+#include "Effect.hpp"
 
-class BlobWorld 
+class BlobWorld : public Effect 
 {
   private:
     typedef struct blob_type
@@ -17,18 +17,17 @@ class BlobWorld
 
     blob_type blob[4];
     float smooth[4];
-    int stripLength;
 
     blob_type updateBlob(blob_type blob);
-    blob_type wallColl(blob_type blob);
+    blob_type wallColl(blob_type blob, int stripLength);
     int findSign(int inputNum);
     int depOrArrv(blob_type &blob1, blob_type &blob2);
     void blobColl(blob_type &blob1, blob_type &blob2);
 
   public:
-    BlobWorld(int stripLength);
-    
-    void update(Adafruit_NeoPixel &strip, float brightness);
+    BlobWorld();
+
+    void updateAndRender(Strip& strip, float smallKnobValue);
 };
 
 #endif

@@ -1,7 +1,8 @@
 #include "Arduino.h"
 #include "BlobWorld.hpp"
+#include "../Strip.hpp"
 
-BlobWorld::BlobWorld(int stripLength) :
+BlobWorld::BlobWorld() :
   blob{
     {
       3.0f, 1.0f, {
@@ -31,8 +32,7 @@ BlobWorld::BlobWorld(int stripLength) :
       , millis()
     }
   },
-  smooth{0,0,0,0},
-  stripLength(stripLength)
+  smooth{0,0,0,0}
 {
   
 }
@@ -58,7 +58,7 @@ int BlobWorld::findSign(int inputNum)
   return (sign);
 }
 
-BlobWorld::blob_type BlobWorld::wallColl(blob_type blob)
+BlobWorld::blob_type BlobWorld::wallColl(blob_type blob, int stripLength)
 {
   if ((blob.x >= stripLength) && (blob.v > 0.0f))
   {
@@ -171,11 +171,11 @@ void BlobWorld::blobColl(BlobWorld::blob_type &blob1, BlobWorld::blob_type &blob
   }
 }
 
-void BlobWorld::update(Adafruit_NeoPixel &strip, float brightness) 
+void BlobWorld::updateAndRender(Strip &strip, float brightness) 
 {
-  for (int i = 0; i <= stripLength; i++)
+  for (int i = 0; i <= strip.getLength(); i++)
   {
-    strip.setPixelColor(i, 7 * brightness, 45 * brightness, 27 * brightness);
+    strip.setPixelRGB(i, 7 * brightness, 45 * brightness, 27 * brightness);
   }
   
   for (int i = 0; i < 4; i++)
@@ -187,13 +187,11 @@ void BlobWorld::update(Adafruit_NeoPixel &strip, float brightness)
     smooth[2] = 1;
     smooth[3] = cos((remx + 1) * 0.7854f);
 
-    strip.setPixelColor(blobX - 1, brightness * blob[i].color[0]*smooth[3], brightness * blob[i].color[1]*smooth[3], brightness * blob[i].color[2]*smooth[3]);
-    strip.setPixelColor(blobX, brightness * blob[i].color[0]*smooth[2], brightness * blob[i].color[1]*smooth[2], brightness * blob[i].color[2]*smooth[2]);
-    strip.setPixelColor(blobX + 1, brightness * blob[i].color[0]*smooth[1], brightness * blob[i].color[1]*smooth[1], brightness * blob[i].color[2]*smooth[1]);
+    strip.setPixelRGB(blobX - 1, brightness * blob[i].color[0]*smooth[3], brightness * blob[i].color[1]*smooth[3], brightness * blob[i].color[2]*smooth[3]);
+    strip.setPixelRGB(blobX, brightness * blob[i].color[0]*smooth[2], brightness * blob[i].color[1]*smooth[2], brightness * blob[i].color[2]*smooth[2]);
+    strip.setPixelRGB(blobX + 1, brightness * blob[i].color[0]*smooth[1], brightness * blob[i].color[1]*smooth[1], brightness * blob[i].color[2]*smooth[1]);
   }
   
-  strip.show();
-
   for (int a = 0; a < 4; a++)
   {
     for (int b = a; b < 4; b++)
@@ -204,7 +202,7 @@ void BlobWorld::update(Adafruit_NeoPixel &strip, float brightness)
 
   for (int f = 0; f < 4; f++)
   {
-    blob[f] = wallColl(blob[f]);
+    blob[f] = wallColl(blob[f], strip.getLength());
   }
 
   for (int p = 0; p < 4; p++)

@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "Strip.hpp"
-#include "BlobWorld.hpp"
+#include "effects/BlobWorld.cpp"
 #include "effects/PixelFade.hpp"
 
 #define PIN 8
@@ -37,9 +37,13 @@ enum FunModeEffects {
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(98, PIN, NEO_GRB + NEO_KHZ800);
 
 Strip fullStrip = Strip(strip, 0, 98);
-PixelFade<98> pixelFade = PixelFade<98>();
+Strip firstTriangleStrip = Strip(strip, 0, FIRST_TRIANGLE_LENGTH);
+Strip secondTriangleStrip = Strip(strip, FIRST_TRIANGLE_LENGTH, 98);
 
-BlobWorld blobWorld(STRIPLENGTHINT);
+PixelFade<FIRST_TRIANGLE_LENGTH> pixelFadeFirstTriangle;
+PixelFade<98 - FIRST_TRIANGLE_LENGTH> pixelFadeSecondTriangle(0.8f);
+
+BlobWorld blobWorld;
 float k = 0.0f;
 
 float readBigKnob() {
@@ -56,15 +60,6 @@ void setPixelRGB(int index, float r, float g, float b)
 {
   strip.setPixelColor(index, r * 255, g * 255, b * 255);
 }
-
-/*
-void setPixelHSV(int index, float h, float s, float v) 
-{
-  float rgb[3];
-  cubehelix_hsv2rgb(h, s, v, rgb);
-  setPixelRGB(index, rgb[0], rgb[1], rgb[2]);
-}
-*/
 
 void setup()
 {
@@ -260,12 +255,14 @@ void updateFunMode()
   if (selectedEffect == BLOBS)
   {
     float brightness = readSmallKnob();
-    blobWorld.update(strip, brightness);
+    blobWorld.updateAndRender(fullStrip, brightness);
+    strip.show();
   }
 
   if (selectedEffect == PIXEL_FADE)
   {
-    pixelFade.updateAndRender(fullStrip, readSmallKnob());
+    pixelFadeFirstTriangle.updateAndRender(firstTriangleStrip, readSmallKnob());
+    pixelFadeSecondTriangle.updateAndRender(secondTriangleStrip, readSmallKnob());
     strip.show();
   }
 }
